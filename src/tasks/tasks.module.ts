@@ -5,20 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { TasksRepository } from './tasks.repository';
 import { DataSource } from 'typeorm';
-import { tasksProviders } from './tasks.providers';
-import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-    // imports: [TypeOrmModule.forFeature([Task])],
-    imports: [DatabaseModule],
+    imports: [TypeOrmModule.forFeature([Task])],
     controllers: [TasksController],
-    providers: [TasksService, ...tasksProviders],
+    providers: [TasksService, TasksRepository],
 })
 export class TasksModule {}
-
-// @Module({
-//     imports: [TypeOrmModule.forFeature([Task])],
-//     exports: [TasksService],
-//     providers: [TasksService, TasksRepository],
-// })
-// export class TasksModule {}

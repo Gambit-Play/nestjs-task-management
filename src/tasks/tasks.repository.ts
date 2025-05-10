@@ -1,40 +1,29 @@
 import { DataSource, Repository } from 'typeorm';
 import { Task } from './task.entity';
+import { Injectable } from '@nestjs/common';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { TaskStatus } from './tasks.enum';
 
-// export class TasksRepository extends Repository<Task> {
-//     async findTaskById(id: string): Promise<Task | null> {
-//         const task = await this.findOne({ where: { id } });
+@Injectable()
+export class TasksRepository extends Repository<Task> {
+    constructor(dataSource: DataSource) {
+        super(Task, dataSource.createEntityManager());
+    }
 
-//         return task;
-//     }
-// }
+    async findTaskById(id: string): Promise<Task | null> {
+        return this.findOne({ where: { id } });
+    }
 
-// export class TasksRepository extends Repository<Task> {
-//     constructor(
-//         @InjectRepository(Task)
-//         private taskRepository: Repository<Task>,
-//     ) {
-//         super(
-//             taskRepository.target,
-//             taskRepository.manager,
-//             taskRepository.queryRunner,
-//         );
-//     }
+    async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
+        const { title, description } = createTaskDto;
+        const task = this.create({
+            title,
+            description,
+            status: TaskStatus.OPEN,
+        });
 
-//     // sample method for demo purposes
-//     async findById(id: string): Promise<Task | null> {
-//         return await this.taskRepository.findOneBy({ id });
-//     }
-// }
+        await this.save(task);
 
-export const createTasksRepository = (dataSource: DataSource) => {
-    return dataSource.getRepository(Task).extend({
-        async findTaskById(id: string): Promise<Task | null> {
-            // REMOVE:
-            console.log('::::::00::::::');
-            return this.findOne({ where: { id } });
-        },
-    });
-};
-
-export type TasksRepository = ReturnType<typeof createTasksRepository>;
+        return task;
+    }
+}
